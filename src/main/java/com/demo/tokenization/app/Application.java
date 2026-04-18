@@ -1,4 +1,4 @@
-package com.demo.order.app;
+package com.demo.tokenization.app;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
