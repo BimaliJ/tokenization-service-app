@@ -32,10 +32,10 @@ public class TokenizationService
     public List<String> tokenize(List<String> accountNumbers)
     {
             List<TokenEntity> tokenEntities = accountNumbers.stream()
-                    .map(pan -> {
+                    .map(accountNumber -> {
                         String token = UUID.randomUUID().toString();
-                        String encrypted = encryptionUtils.encrypt(pan);
-                        return new TokenEntity(token, encrypted);
+                        String encryptedAccNo = encryptionUtils.encrypt(accountNumber);
+                        return new TokenEntity(token, encryptedAccNo);
                     })
                     .collect(Collectors.toList());
             return tokenRepository.saveAll(tokenEntities)
@@ -50,15 +50,9 @@ public class TokenizationService
     public List<String> detokenize(List<String> tokens) throws TokenizationException
     {
         return tokens.stream()
-                .map(token -> {
-                    try {
-                        return tokenRepository.findByToken(token)
-                                .map(tokenEntity -> encryptionUtils.decrypt(tokenEntity.getEncryptedPan()))
-                                .orElseThrow(() -> new TokenizationException("Invalid token: ", token));
-                    } catch (TokenizationException e) {
-                        throw new RuntimeException(e);
-                    }
-                })
+                .map(token -> tokenRepository.findByToken(token)
+                        .map(tokenEntity -> encryptionUtils.decrypt(tokenEntity.getEncryptedPan()))
+                        .orElseThrow(() -> new TokenizationException("Invalid token: ", token)))
                 .collect(Collectors.toList());
     }
 }
